@@ -6,11 +6,19 @@
 # source your conda environment (which should live in Aoraki)
 source /nfs-share/lj408/miniconda3/bin/activate fdabert
 
-python3 finetune.py \
-  --model_name_or_path "domainbert/" \
-  --dataset_name ncbi_disease \
-  --output_dir domain-ner \
-  --do_train \
-  --do_eval \
-  --save_steps=4000 \
-  --cache_dir "/nfs-share/lj408/FDABERT/cache/domainbert" \
+declare -a data_name=( "ncbi_disease" "drAbreu/bc4chemd_ner" "bc2gm_corpus" "jnlpba" "species_800" )  # "tner/bc5cdr" "linnaeus" "ncbi_disease"  "bigbio/gad" "bigbio/euadr" "bigbio/chemprot"
+for ((k=0; k<${#data_name[@]}; k++)); 
+do
+  srun python3 finetune.py \
+    --model_name_or_path "fdabert/" \
+    --tokenizer_name "distilbert-base-cased" \
+    --dataset_name "${data_name[k]}" \
+    --output_dir "fda-downstream/${data_name[k]}" \
+    --do_train \
+    --do_eval \
+    --num_train_epochs 20 \
+    --per_gpu_train_batch_size 32 \
+    --save_steps=100000 \
+    --cache_dir "/nfs-share/lj408/FDABERT/cache/ner" \
+    --overwrite_output_dir
+done 

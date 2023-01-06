@@ -8,7 +8,7 @@ import numpy as np
 from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, Callable, Optional, Tuple, List
-from utils import fl_partition, initialise, train, test, logger #, load_data
+from utils_s import fl_partition, initialise, train, test, logger, load_data
 import argparse
 import json
 import logging
@@ -39,20 +39,19 @@ from transformers import (
     SchedulerType,
     get_scheduler,
 )
-import dill
 from transformers.utils import check_min_version, get_full_repo_name, send_example_telemetry
 from transformers.utils.versions import require_version
-#os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/language-modeling/requirements.txt")
 MODEL_CONFIG_CLASSES = list(MODEL_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
-RAY_ADDRESS="128.232.115.65:6379"
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Flower Simulation with bert")
 
     parser.add_argument("--num_client_cpus", type=int, default=3)
-    parser.add_argument("--num_rounds", type=int, default=10)
+    parser.add_argument("--num_rounds", type=int, default=1)
 
     parser.add_argument(
         "--dataset_name",
@@ -245,38 +244,42 @@ class FlowerClient(fl.client.NumPyClient):
         self.cid = cid
         self.args = args
         self.args.output_dir = self.args.output_dir + str(int(cid)+1)
-        self.fed_dir_data = fed_dir_data
+        self.args.train_file = fed_dir_data + str('train{}.txt'.format(str(int(cid)+1)))
+        self.args.validation_file = fed_dir_data + str('val{}.txt'.format(str(int(cid)+1)))       
+        #self.accelerator, self.model, self.tokenizer = initialise(self.args)
         self.model = initialise(self.args)
         self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   
-        #print("cuda:{}".format(str(int(cid)+7)))
-
+        #self.device = torch.device("cuda:{}".format(str(int(cid))) if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")   
+        print("cuda:{}".format(str(int(cid)+7)))
     def get_parameters(self, config):
         return get_params(self.model)
 
     def fit(self, parameters, config):
         set_params(self.model, parameters)
-       # num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
-        print("Train Data loading...")            
-        with open('data_real/partition/train{}_dataloader.pkl'.format(self.cid),'rb') as f:
-            train_dataloader = dill.load(f)
+        num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
+        print("Train Data loading...")
+        train_dataloader, eval_dataloader, tokenizer = load_data(self.args, num_workers)
         print("Train Data loading finished...")
- 
+        # We resize the embeddings only when necessary to avoid index errors. If you are creating a model from scratch
+        # on a small vocab and want a smaller embedding size, remove this test.
+        embedding_size = self.model.get_input_embeddings().weight.shape[0]
+        if len(tokenizer) > embedding_size:
+            self.model.resize_token_embeddings(len(tokenizer))# Train
         print("Training Started...")
-        train(self.args, self.model.to(self.device), train_dataloader, self.device)
+        train(self.args, self.model.to(self.device), tokenizer, train_dataloader, self.device)
         print("Training Finished...")
         # Return local model and statistics
         return get_params(self.model), len(train_dataloader), {}
 
     def evaluate(self, parameters, config):
         set_params(self.model, parameters)
-        #num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])     
+        num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
         print("Eval Data loading...")
-        with open('data_real/partition/eval{}_dataloader.pkl'.format(self.cid),'rb') as f:
-            eval_dataloader = dill.load(f)
+        train_dataloader, eval_dataloader, tokenizer = load_data(self.args, num_workers)
         print("Eval Data loading finished...")
-
-        # Evaluate       
+        # Evaluate
+        print("Evaluating...")
         loss, perplexity = test(self.args, self.model.to(self.device), eval_dataloader, self.device)
         print("Evaluating finished...")
         # Return statistics
@@ -286,7 +289,7 @@ class FlowerClient(fl.client.NumPyClient):
 def fit_config(server_round: int) -> Dict[str, Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
-        "epochs": 3,  # number of local epochs
+        "epochs": 1,  # number of local epochs
         "batch_size": 8,
     }
     return config
@@ -317,18 +320,17 @@ def get_evaluate_fn(
         """Use the entire CIFAR-10 test set for evaluation."""
 
         # determine device
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         model = initialise(args)
-        
-   
-        with open('data_real/eval_dataloader.pkl','rb') as f:
-            eval_dataloader = dill.load(f)
-
-        set_params(model, parameters)
         model.to(device)
+        args.train_file = testset
+        args.validation_file = testset
+
+        train_dataloader, eval_dataloader, tokenizer = load_data(args, 7)
+        
+        set_params(model, parameters)
         loss, perplexity = test(args, model, eval_dataloader, device)
 
-        model.save_pretrained(args.output_dir)
         # return statistics
         return loss, {"perplexity": perplexity}
 
@@ -364,7 +366,7 @@ if __name__ == "__main__":
         min_evaluate_clients=2,
         min_available_clients=pool_size,  # All clients should be available
         on_fit_config_fn=fit_config,
-        evaluate_fn=get_evaluate_fn("data/partition/val1.txt", args),  # centralised evaluation of global model
+        #evaluate_fn=get_evaluate_fn("data/val.txt", args),  # centralised evaluation of global model
     )
 
     def client_fn(cid: str):
@@ -372,15 +374,14 @@ if __name__ == "__main__":
         return FlowerClient(cid, fed_dir, args)
 
     # (optional) specify Ray config
-    ray_init_args = {"include_dashboard": False, "address": "128.232.115.65:6379"}
+    #ray_init_args = {"include_dashboard": False}
 
-    from app import start_simulation
     # start simulation
-    start_simulation(
+    fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=pool_size,
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
-        ray_init_args=ray_init_args,
+        #ray_init_args=ray_init_args,
     )

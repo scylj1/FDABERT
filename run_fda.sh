@@ -9,10 +9,11 @@ source /nfs-share/lj408/miniconda3/bin/activate fdabert
 srun python3 fdabert.py \
     --train_file "data/train.txt" \
     --validation_file "data/val.txt" \
-    --model_name_or_path distilbert-base-uncased \
-    --per_device_train_batch_size 8 \
-    --checkpointing_steps=20000 \
+    --model_name_or_path "fdabert/" \
+    --per_device_train_batch_size 32 \
+    --checkpointing_steps=epoch \
     --output_dir "/nfs-share/lj408/FDABERT/fdabert/" \
     --cache_dir "/nfs-share/lj408/FDABERT/cache/fdabert/" \
     --num_train_epochs 1 \
+    --num_rounds 5
     

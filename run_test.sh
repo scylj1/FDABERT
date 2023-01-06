@@ -6,12 +6,12 @@
 # source your conda environment (which should live in Aoraki)
 source /nfs-share/lj408/miniconda3/bin/activate fdabert
 
-srun python3 test.py \
+srun python3 testtest.py \
     --train_file "data/train.txt" \
     --validation_file "data/val.txt" \
-    --model_name_or_path bert-base-uncased \
+    --model_name_or_path "domainbert/checkpoint-29760/" \
     --per_device_train_batch_size 8 \
-    --checkpointing_steps=4000 \
+    --checkpointing_steps=40000 \
     --output_dir "/nfs-share/lj408/FDABERT/test-new" \
     --cache_dir "/nfs-share/lj408/FDABERT/cache/domainbert" \
     --num_train_epochs 1\

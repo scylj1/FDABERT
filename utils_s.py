@@ -12,7 +12,7 @@ import torch
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-import time
+
 import transformers
 from accelerate import Accelerator, DistributedType
 from accelerate.logging import get_logger
@@ -30,7 +30,7 @@ from transformers import (
 )
 from transformers.utils import check_min_version, get_full_repo_name, send_example_telemetry
 from transformers.utils.versions import require_version
-#os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 logger = get_logger(__name__)
 
@@ -77,8 +77,137 @@ def initialise(args):
         model = AutoModelForMaskedLM.from_config(config)
           
     return model
+
+def load_data(args, workers):
+    data_files = {}
+    if args.train_file is not None:
+        data_files["train"] = args.train_file
+    if args.validation_file is not None:
+        data_files["validation"] = args.validation_file
+    extension = args.validation_file.split(".")[-1]
+    if extension == "txt":
+        extension = "text"
+    raw_datasets = load_dataset(extension, data_files=data_files,cache_dir=args.cache_dir)
+    # If no validation data is there, validation_split_percentage will be used to divide the dataset.
+    if "validation" not in raw_datasets.keys():
+        raw_datasets["validation"] = load_dataset(
+            extension,
+            data_files=data_files,
+            cache_dir=args.cache_dir,
+            split=f"train[:{args.validation_split_percentage}%]",
+        )
+        raw_datasets["train"] = load_dataset(
+            extension,
+            data_files=data_files,
+            cache_dir=args.cache_dir,
+            split=f"train[{args.validation_split_percentage}%:]",
+        )
+    
+    if args.tokenizer_name:
+        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name, use_fast=not args.use_slow_tokenizer)
+    elif args.model_name_or_path:
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, use_fast=not args.use_slow_tokenizer)
+    else:
+        raise ValueError(
+            "You are instantiating a new tokenizer from scratch. This is not supported by this script."
+            "You can do it from another script, save it, and load it from here, using --tokenizer_name."
+        )
+
+    # Preprocessing the datasets.
+    # First we tokenize all the texts.
+    column_names = raw_datasets["train"].column_names
+    text_column_name = "text" if "text" in column_names else column_names[0]
+
+    if args.max_seq_length is None:
+        max_seq_length = tokenizer.model_max_length
+        if max_seq_length > 1024:
+            logger.warning(
+                f"The tokenizer picked seems to have a very large `model_max_length` ({tokenizer.model_max_length}). "
+                "Picking 1024 instead. You can change that default value by passing --max_seq_length xxx."
+            )
+            max_seq_length = 1024
+    else:
+        if args.max_seq_length > tokenizer.model_max_length:
+            logger.warning(
+                f"The max_seq_length passed ({args.max_seq_length}) is larger than the maximum length for the"
+                f"model ({tokenizer.model_max_length}). Using max_seq_length={tokenizer.model_max_length}."
+            )
+        max_seq_length = min(args.max_seq_length, tokenizer.model_max_length)
+        
+    # we tokenize every text, then concatenate them together before splitting them in smaller parts.
+    # We use `return_special_tokens_mask=True` because DataCollatorForLanguageModeling (see below) is more
+    # efficient when it receives the `special_tokens_mask`.
+    def tokenize_function(examples):
+        return tokenizer(examples[text_column_name], return_special_tokens_mask=True)
+
+    
+    tokenized_datasets = raw_datasets.map(
+        tokenize_function,
+        batched=True,
+        num_proc=1, # args.preprocessing_num_workers,
+        remove_columns=column_names,
+        load_from_cache_file=not args.overwrite_cache,
+        desc="Running tokenizer on every text in dataset",
+    )
+
+    # Main data processing function that will concatenate all texts from our dataset and generate chunks of
+    # max_seq_length.
+    def group_texts(examples):
+        # Concatenate all texts.
+        concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}
+        total_length = len(concatenated_examples[list(examples.keys())[0]])
+        # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
+        # customize this part to your needs.
+        if total_length >= max_seq_length:
+            total_length = (total_length // max_seq_length) * max_seq_length
+        # Split by chunks of max_len.
+        result = {
+            k: [t[i : i + max_seq_length] for i in range(0, total_length, max_seq_length)]
+            for k, t in concatenated_examples.items()
+        }
+        return result
+
+        # Note that with `batched=True`, this map processes 1,000 texts together, so group_texts throws away a
+        # remainder for each of those groups of 1,000 texts. You can adjust that batch_size here but a higher value
+        # might be slower to preprocess.
+        #
+        # To speed up this part, we use multiprocessing. See the documentation of the map method for more information:
+        # https://huggingface.co/docs/datasets/package_reference/main_classes.html#datasets.Dataset.map
+
+    
+    tokenized_datasets = tokenized_datasets.map(
+        group_texts,
+        batched=True,
+        num_proc=1, # args.preprocessing_num_workers,
+        load_from_cache_file=not args.overwrite_cache,
+        desc=f"Grouping texts in chunks of {max_seq_length}",
+    )
+
+    train_dataset = tokenized_datasets["train"]
+    eval_dataset = tokenized_datasets["validation"]
+
+    # Conditional for small test subsets
+    if len(train_dataset) > 3:
+        # Log a few random samples from the training set:
+        for index in random.sample(range(len(train_dataset)), 3):
+            logger.info(f"Sample {index} of the training set: {train_dataset[index]}.")
+
+    # Data collator
+    # This one will take care of randomly masking the tokens.
+    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm_probability=args.mlm_probability)
+
+    #kwargs = {"num_workers": workers, "pin_memory": True, "drop_last": False}
+    # DataLoaders creation:
+    train_dataloader = DataLoader(
+        train_dataset, shuffle=False, collate_fn=data_collator, batch_size=args.per_device_train_batch_size
+    )
+    eval_dataloader = DataLoader(eval_dataset, collate_fn=data_collator, batch_size=args.per_device_eval_batch_size)
+    
+      
+    return train_dataloader, eval_dataloader, tokenizer
+   
   
-def train(args, model, train_dataloader, device):
+def train(args, model, tokenizer, train_dataloader, device):
     # If passed along, set the training seed now.
     if args.seed is not None:
         set_seed(args.seed)
@@ -141,13 +270,13 @@ def train(args, model, train_dataloader, device):
     # Train!
     total_batch_size = args.per_device_train_batch_size
     
-    print("***** Running training *****")
-    print(f"  Num examples = {len(train_dataloader)}")
-    print(f"  Num Epochs = {args.num_train_epochs}")
-    print(f"  Instantaneous batch size per device = {args.per_device_train_batch_size}")
-    print(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
-    print(f"  Gradient Accumulation steps = {args.gradient_accumulation_steps}")
-    print(f"  Total optimization steps = {args.max_train_steps}")
+    logger.info("***** Running training *****")
+    logger.info(f"  Num examples = {len(train_dataloader)}")
+    logger.info(f"  Num Epochs = {args.num_train_epochs}")
+    logger.info(f"  Instantaneous batch size per device = {args.per_device_train_batch_size}")
+    logger.info(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
+    logger.info(f"  Gradient Accumulation steps = {args.gradient_accumulation_steps}")
+    logger.info(f"  Total optimization steps = {args.max_train_steps}")
     # Only show the progress bar once on each machine.
     progress_bar = tqdm(range(args.max_train_steps))
     completed_steps = 0
@@ -179,7 +308,7 @@ def train(args, model, train_dataloader, device):
     # update the progress_bar if load from checkpoint
     progress_bar.update(starting_epoch * num_update_steps_per_epoch)
     completed_steps = starting_epoch * num_update_steps_per_epoch
-    start = time.perf_counter()
+
     for epoch in range(starting_epoch, args.num_train_epochs):
         model.train()
         if args.with_tracking:
@@ -211,57 +340,46 @@ def train(args, model, train_dataloader, device):
                         output_dir = os.path.join(args.output_dir, output_dir)
                     model.save_pretrained(output_dir)
                     #accelerator.save_state(output_dir)
-            progress_bar.update(1)
-            completed_steps += 1
-            if step % 1000 == 0:
-                print(f"train_loss {loss}")
+
+            logger.info(f"train_loss {loss}")
             if completed_steps >= args.max_train_steps:
                 break
-          
-        print(f"completed step {completed_steps}")
-        print(f"train_loss {loss}")
+
+            
+        logger.info(f"step {completed_steps}")
+
         if args.checkpointing_steps == "epoch":
             output_dir = f"epoch_{epoch}"
-
-    end = time.perf_counter()
-    train_time = round(end-start)
-    with open(os.path.join(args.output_dir, "train_results.json"), "a+") as f:
-        json.dump({"train loss": float(loss) , "train time(s)": float(train_time)}, f)
 
     if args.output_dir is not None:
         model.save_pretrained(
             args.output_dir
         )
-        
+        tokenizer.save_pretrained(args.output_dir)
             
 def test(args, model, eval_dataloader, device ):
-    loss = 0   
+        
     model.eval()
     losses = []
-    print("***** Running evaluating *****")
-    print(f"  Num examples = {len(eval_dataloader)}")
-    start = time.perf_counter()
     for step, batch in enumerate(eval_dataloader):
         batch = {k: v.to(device) for k, v in batch.items()}
         with torch.no_grad():
             outputs = model(**batch)
 
-        logits = outputs.logits
-        loss += outputs.loss.item()
-        if step % 1000 == 0:
-            print("step: {}, eval loss: {}".format(step, loss))
-    end = time.perf_counter()
-    eval_time = round(end-start)
+        loss = outputs.loss
+        losses.append(loss.repeat(args.per_device_eval_batch_size))
+
+    losses = torch.cat(losses)
     try:
-        #eval_loss = torch.mean(losses)
-        eval_loss = loss / len(eval_dataloader)
+        eval_loss = torch.mean(losses)
         perplexity = math.exp(eval_loss)
     except OverflowError:
         perplexity = float("inf")
 
-    print("perplexity: {}, eval loss: {}, eval time (s): {}".format(perplexity, eval_loss, eval_time))
+    logger.info(f"perplexity {perplexity}")
+    logger.info(f"eval_loss {eval_loss}")
             
-    with open(os.path.join(args.output_dir, "eval_results.json"), "a+") as f:
-        json.dump({"perplexity": float(perplexity), "eval loss": float(eval_loss) , "eval time(s)": float(eval_time)}, f)
+    with open(os.path.join(args.output_dir, "all_results.json"), "w") as f:
+        json.dump({"perplexity": perplexity}, f)
             
     return float(eval_loss), perplexity

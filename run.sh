@@ -7,14 +7,16 @@
 source /nfs-share/lj408/miniconda3/bin/activate fdabert
 
 srun python3 pretrain.py \
-    --model_name_or_path "domainbert/" \
+    --model_name_or_path "distilbert-base-cased" \
     --dataset_name ccdv/pubmed-summarization \
     --dataset_config_name document \
     --per_device_train_batch_size 32 \
     --per_device_eval_batch_size 32 \
     --do_train \
     --do_eval \
-    --save_steps=40000 \
-    --num_train_epochs 7 \
+    --save_strategy "epoch" \
+    --evaluation_strategy "epoch" \
+    --num_train_epochs 10 \
     --output_dir "/nfs-share/lj408/FDABERT/domainbert" \
     --cache_dir "/nfs-share/lj408/FDABERT/cache/domainbert" \
+    --ignore_data_skip \
