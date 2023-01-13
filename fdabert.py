@@ -47,13 +47,14 @@ from transformers.utils.versions import require_version
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/language-modeling/requirements.txt")
 MODEL_CONFIG_CLASSES = list(MODEL_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
-RAY_ADDRESS="128.232.115.65:6379"
+#RAY_ADDRESS="128.232.115.65:6379"
 def parse_args():
     parser = argparse.ArgumentParser(description="Flower Simulation with bert")
 
     parser.add_argument("--num_client_cpus", type=int, default=3)
     parser.add_argument("--num_rounds", type=int, default=10)
-
+    parser.add_argument("--num_clients", type=int, default=2)
+     
     parser.add_argument(
         "--dataset_name",
         type=str,
@@ -258,7 +259,7 @@ class FlowerClient(fl.client.NumPyClient):
         set_params(self.model, parameters)
        # num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
         print("Train Data loading...")            
-        with open('data_real/partition/train{}_dataloader.pkl'.format(self.cid),'rb') as f:
+        with open('data_real/client{}/train{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
             train_dataloader = dill.load(f)
         print("Train Data loading finished...")
  
@@ -272,7 +273,7 @@ class FlowerClient(fl.client.NumPyClient):
         set_params(self.model, parameters)
         #num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])     
         print("Eval Data loading...")
-        with open('data_real/partition/eval{}_dataloader.pkl'.format(self.cid),'rb') as f:
+        with open('data_real/client{}/eval{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
             eval_dataloader = dill.load(f)
         print("Eval Data loading finished...")
 
@@ -342,7 +343,7 @@ if __name__ == "__main__":
     # parse input arguments
     args = parse_args()
     
-    pool_size = 2  # number of dataset partions (= number of total clients)
+    pool_size = args.num_clients  # number of dataset partions (= number of total clients)
     client_resources = {
         "num_cpus": 7, # args.num_client_cpus,
         "num_gpus": 1
@@ -354,14 +355,14 @@ if __name__ == "__main__":
     # This will create a new directory called "federated": in the directory where
     # CIFAR-10 lives. Inside it, there will be N=pool_size sub-directories each with
     # its own train/set split.
-    fed_dir = fl_partition(pool_size)
+    #fed_dir = fl_partition(pool_size)
     
     # configure the strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.1,
         fraction_evaluate=0.1,
-        min_fit_clients=2,
-        min_evaluate_clients=2,
+        min_fit_clients=pool_size,
+        min_evaluate_clients=pool_size,
         min_available_clients=pool_size,  # All clients should be available
         on_fit_config_fn=fit_config,
         evaluate_fn=get_evaluate_fn("data/partition/val1.txt", args),  # centralised evaluation of global model
@@ -369,10 +370,10 @@ if __name__ == "__main__":
 
     def client_fn(cid: str):
         # create a single client instance
-        return FlowerClient(cid, fed_dir, args)
+        return FlowerClient(cid, None, args)
 
     # (optional) specify Ray config
-    ray_init_args = {"include_dashboard": False, "address": "128.232.115.65:6379"}
+    ray_init_args = {"include_dashboard": False}
 
     from app import start_simulation
     # start simulation
