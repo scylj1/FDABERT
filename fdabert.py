@@ -358,7 +358,8 @@ if __name__ == "__main__":
     #fed_dir = fl_partition(pool_size)
     
     # configure the strategy
-    strategy = fl.server.strategy.FedAvg(
+    from fedavg import FedAvg
+    strategy = FedAvg(
         fraction_fit=0.1,
         fraction_evaluate=0.1,
         min_fit_clients=pool_size,
