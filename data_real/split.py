@@ -11,17 +11,19 @@ nltk.download('punkt')
 def test_sent_len():
     dics2 = load_file("noniid_voc/client2/train2.txt")
     dics1 = load_file("noniid_voc/client2/train1.txt")
+    print("load finish")
     lens1 = get_sentence_len(dics1)
     lens2 = get_sentence_len(dics2)
     print("noniidvoc file1 average sentence length{}".format(sum(lens1)/len(lens1)))
     print("noniidvoc file2 average sentence length{}".format(sum(lens2)/len(lens2)))
     
-    dics2 = load_file("noniid_num/client2/train2.txt")
+    '''dics2 = load_file("noniid_num/client2/train2.txt")
     dics1 = load_file("noniid_num/client2/train1.txt")
+    print("load finish")
     lens1 = get_sentence_len(dics1)
     lens2 = get_sentence_len(dics2)
     print("noniidnum file1 average sentence length{}".format(sum(lens1)/len(lens1)))
-    print("noniidnum file2 average sentence length{}".format(sum(lens2)/len(lens2)))
+    print("noniidnum file2 average sentence length{}".format(sum(lens2)/len(lens2)))'''
     
     '''dics2 = load_file("client2/train2.txt")
     dics1 = load_file("client2/train1.txt")
@@ -36,27 +38,58 @@ def test_sent_len():
     lens2 = get_sentence_len(dics2)
     print("noniidlen file1 average sentence length{}".format(sum(lens1)/len(lens1)))
     print("noniidlen file2 average sentence length{}".format(sum(lens2)/len(lens2)))'''
+    
+    '''dics2 = load_file("client2/val2.txt")
+    dics1 = load_file("client2/val1.txt")
+    lens1 = get_sentence_len(dics1)
+    lens2 = get_sentence_len(dics2)
+    print("noniid file1 average sentence length{}".format(sum(lens1)/len(lens1)))
+    print("noniid file2 average sentence length{}".format(sum(lens2)/len(lens2)))'''
+    
+    '''dics2 = load_file("noniid_voc/client2/val2.txt")
+    #dics1 = load_file("noniid_voc/client2/val1.txt")
+    print("load finish")
+    #lens1 = get_sentence_len(dics1)
+    lens2 = get_sentence_len(dics2)
+    #print("noniidvoc file1 average sentence length{}".format(sum(lens1)/len(lens1)))
+    print("noniidvoc file2 average sentence length{}".format(sum(lens2)/len(lens2)))'''
 
 def test_voc():
     '''dics2 = load_file("client2/train2.txt")
     dics1 = load_file("client2/train1.txt")
-    len1 = test_vocab(dics1)
-    len2 = test_vocab(dics2)
-    
-    dics2 = load_file("noniid_voc/client2/train2.txt")
-    dics1 = load_file("noniid_voc/client2/train1.txt")
+    print("load finish")
     len1 = test_vocab(dics1)
     len2 = test_vocab(dics2)'''
     
-    dics2 = load_file("noniid_num/client2/train2.txt")
-    dics1 = load_file("noniid_num/client2/train1.txt")
+    dics2 = load_file("noniid_voc/client2/train2.txt")
+    dics1 = load_file("noniid_voc/client2/train1.txt")
+    print("load finish")
     len1 = test_vocab(dics1)
     len2 = test_vocab(dics2)
     
-    dics2 = load_file("noniid_len/client2/train2.txt")
-    dics1 = load_file("noniid_len/client2/train1.txt")
+    '''dics2 = load_file("noniid_num/client2/train2.txt")
+    dics1 = load_file("noniid_num/client2/train1.txt")
+    print("load finish")
     len1 = test_vocab(dics1)
-    len2 = test_vocab(dics2)
+    len2 = test_vocab(dics2)'''
+    
+    '''dics2 = load_file("noniid_len/client2/train2.txt")
+    dics1 = load_file("noniid_len/client2/train1.txt")
+    print("load finish")
+    len1 = test_vocab(dics1)
+    len2 = test_vocab(dics2)'''
+    
+    '''dics2 = load_file("client2/val2.txt")
+    dics1 = load_file("client2/val1.txt")
+    print("load finish")
+    len1 = test_vocab(dics1)
+    len2 = test_vocab(dics2)'''
+    
+    '''dics2 = load_file("noniid_voc/client2/val2.txt")
+    #dics1 = load_file("noniid_voc/client2/val1.txt")
+    print("load finish")
+    #len1 = test_vocab(dics1)
+    len2 = test_vocab(dics2)'''
     
     
 def load_file(file):
@@ -110,18 +143,19 @@ def get_vocab(dics):
 
 def test_vocab(dics): 
     voc = []
-    count = 1  
+    count = 0 
     for dic in dics:
         texts = dic['article_text']
         for sent in texts:        
             sent_token = word_tokenize(sent)
             for tok in sent_token:
                 if tok not in voc:
-                    voc.append(tok)
+                    #voc.append(tok)
+                    count += 1
         #print(count)
-        count += 1
-    print(len(voc))
-    return len(voc)
+        
+    print(count)
+    return count
 
 def noniid_partition(num, rank, file, ifval = True):
     num_files = num
@@ -169,8 +203,17 @@ def noniid_partition_num(num):
  
 if __name__ == "__main__":
     
-    '''dfile = "train.txt"
-    dics = load_file(dfile)'''
+    dfile = "train.txt"
+    dics = load_file(dfile)
+    sent_lens = get_sentence_len(dics)
+    vocs, vocs_lens = get_vocab(dics)
+    
+    tem = np.divide(np.mat(sent_lens),np.mat(vocs_lens))
+    tem = np.divide(np.mat(tem),np.mat(vocs_lens))
+    tem = np.matrix.tolist(tem)
+    rank = np.argsort(tem[0])
+    
+    noniid_partition(2, rank, dfile, ifval = False)
     
     '''sent_lens = get_sentence_len(dics)
     rank = np.argsort(sent_lens)
