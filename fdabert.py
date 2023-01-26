@@ -259,7 +259,7 @@ class FlowerClient(fl.client.NumPyClient):
         set_params(self.model, parameters)
        # num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
         print("Train Data loading...")            
-        with open('data_real/client{}/train{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
+        with open('data_real/noniid_voc/client{}/train{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
             train_dataloader = dill.load(f)
         print("Train Data loading finished...")
  
@@ -273,7 +273,7 @@ class FlowerClient(fl.client.NumPyClient):
         set_params(self.model, parameters)
         #num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])     
         print("Eval Data loading...")
-        with open('data_real/client{}/eval{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
+        with open('data_real/noniid_voc/client{}/eval{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
             eval_dataloader = dill.load(f)
         print("Eval Data loading finished...")
 

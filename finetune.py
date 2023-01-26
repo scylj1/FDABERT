@@ -583,6 +583,10 @@ def main():
 
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
+        
+        res = str(metrics['eval_precision']) + '\n' + str(metrics['eval_recall']) + '\n' + str(metrics['eval_f1']) + '\n'
+        with open ('results/ner_d_val.txt', 'a') as f:
+            f.write(res)
 
     # Predict
     if training_args.do_predict:
@@ -599,6 +603,12 @@ def main():
 
         trainer.log_metrics("predict", metrics)
         trainer.save_metrics("predict", metrics)
+        
+        res = str(metrics['predict_precision']) + '\n' + str(metrics['predict_recall']) + '\n' + str(metrics['predict_f1']) + '\n'
+        with open ('results/ner_d.txt', 'a') as f:
+            f.write(res)
+            
+        #print(f"f1: {round(metrics['predict_f1'], 2)}")
 
         # Save predictions
         output_predictions_file = os.path.join(training_args.output_dir, "predictions.txt")

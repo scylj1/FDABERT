@@ -243,7 +243,7 @@ class FedAvg(Strategy):
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         end = time.perf_counter()
-        agg_time = round(end-start)
+        agg_time = end-start
         print("agg time (s): {}".format(agg_time))
         
         return parameters_aggregated, metrics_aggregated
