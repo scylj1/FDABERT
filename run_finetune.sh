@@ -14,10 +14,10 @@ do
   for ((j=0; j<${#seeds[@]}; j++)); 
   do
     srun python3 finetune.py \
-      --model_name_or_path  "distilbert-base-cased" \
+      --model_name_or_path  "fdabert-15/client2/" \
       --tokenizer_name "distilbert-base-cased" \
       --dataset_name "${data_name[k]}" \
-      --output_dir "distilbert-ner-origin/${data_name[k]}" \
+      --output_dir "distilbert-ner/${data_name[k]}" \
       --do_train \
       --do_eval \
       --do_predict \
