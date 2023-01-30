@@ -42,6 +42,7 @@ from transformers import (
 import dill
 from transformers.utils import check_min_version, get_full_repo_name, send_example_telemetry
 from transformers.utils.versions import require_version
+from freeze import freeze_unfreeze_layers, get_para_num, get_trainable_para_num
 #os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/language-modeling/requirements.txt")
@@ -54,6 +55,15 @@ def parse_args():
     parser.add_argument("--num_client_cpus", type=int, default=3)
     parser.add_argument("--num_rounds", type=int, default=10)
     parser.add_argument("--num_clients", type=int, default=2)
+    
+    parser.add_argument("--do_freeze", type=bool, default=False)
+    
+    parser.add_argument(
+        "--fed_dir_data",
+        type=str,
+        default=None,
+        help="federated dataset dir.",
+    )
      
     parser.add_argument(
         "--dataset_name",
@@ -249,7 +259,21 @@ class FlowerClient(fl.client.NumPyClient):
         self.fed_dir_data = fed_dir_data
         self.model = initialise(self.args)
         self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
+        
+        print("Train Data loading...")            
+        with open(self.fed_dir_data + 'client{}/train{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
+            self.train_dataloader = dill.load(f)
+        print("Train Data loading finished...")
+        
+        print("Eval Data loading...")
+        with open(self.fed_dir_data + 'client{}/eval{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
+            self.eval_dataloader = dill.load(f)
+        print("Eval Data loading finished...")
+        
+        if self.args.do_freeze:
+            freeze(self.model, len(self.train_dataloader))
+            
         #print("cuda:{}".format(str(int(cid)+7)))
 
     def get_parameters(self, config):
@@ -258,36 +282,47 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         set_params(self.model, parameters)
        # num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
-        print("Train Data loading...")            
-        with open('data_real/noniid_voc/client{}/train{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
-            train_dataloader = dill.load(f)
-        print("Train Data loading finished...")
- 
+        
         print("Training Started...")
-        train(self.args, self.model.to(self.device), train_dataloader, self.device)
+        train(self.args, self.model.to(self.device), self.train_dataloader, self.device)
         print("Training Finished...")
         # Return local model and statistics
-        return get_params(self.model), len(train_dataloader), {}
+        return get_params(self.model), len(self.train_dataloader), {}
 
     def evaluate(self, parameters, config):
         set_params(self.model, parameters)
         #num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])     
-        print("Eval Data loading...")
-        with open('data_real/noniid_voc/client{}/eval{}_dataloader.pkl'.format(self.args.num_clients, self.cid),'rb') as f:
-            eval_dataloader = dill.load(f)
-        print("Eval Data loading finished...")
-
+    
         # Evaluate       
-        loss, perplexity = test(self.args, self.model.to(self.device), eval_dataloader, self.device)
+        loss, perplexity = test(self.args, self.model.to(self.device), self.eval_dataloader, self.device)
         print("Evaluating finished...")
         # Return statistics
-        return float(loss), len(eval_dataloader), {"perplexity": float(perplexity)}
+        return float(loss), len(self.eval_dataloader), {"perplexity": float(perplexity)}
+    
+    def freeze(model, train_size):
+        train_all = 270000
+        layer_all = 6
+        freeze_layer = round(layer_all * train_size / train_all)
+        get_para_num(model)
+        get_trainable_para_num(model)
+        
+        if freeze_layer == 0:
+            freeze_layer += 1
+            
+        layer = self.cid * freeze_layer % layer_all
+        if freeze_layer == 1:
+            freeze_unfreeze_layers(model, layer, unfreeze=False)
+        else:       
+            freeze_unfreeze_layers(model, (layer, (layer + freeze_layer-1) % layer_all), unfreeze=False)
+
+        get_para_num(model)
+        get_trainable_para_num(model)
 
 
 def fit_config(server_round: int) -> Dict[str, Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
-        "epochs": 3,  # number of local epochs
+        "epochs": 1,  # number of local epochs
         "batch_size": 8,
     }
     return config
@@ -371,7 +406,7 @@ if __name__ == "__main__":
 
     def client_fn(cid: str):
         # create a single client instance
-        return FlowerClient(cid, None, args)
+        return FlowerClient(cid, args.fed_dir_data, args)
 
     # (optional) specify Ray config
     ray_init_args = {"include_dashboard": False}

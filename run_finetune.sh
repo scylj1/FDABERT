@@ -6,7 +6,7 @@
 # source your conda environment (which should live in Aoraki)
 source /nfs-share/lj408/miniconda3/bin/activate fdabert
 
-declare -a data_name=( "ncbi_disease" "ghadeermobasher/BC5CDR-Chemical-Disease" "drAbreu/bc4chemd_ner" "bc2gm_corpus" "jnlpba" "linnaeus" "species_800" )  # "ghadeermobasher/BC5CDR-Chemical-Disease" "drAbreu/bc4chemd_ner" "bc2gm_corpus" "jnlpba" "linnaeus" "species_800"
+declare -a data_name=( "ncbi_disease" "ghadeermobasher/BC5CDR-Chemical-Disease" "drAbreu/bc4chemd_ner" "bc2gm_corpus" "linnaeus" "species_800" )  # "jnlpba"
 declare -a seeds=(42 123 3407 54354 43534 ) # 123 3407 54354 43534
 
 for ((k=0; k<${#data_name[@]}; k++)); 
