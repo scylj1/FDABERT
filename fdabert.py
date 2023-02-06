@@ -252,7 +252,7 @@ def parse_args():
             
 # Flower client, adapted from Pytorch quickstart example
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, cid: str, fed_dir_data: str, args):
+    def __init__(self, cid: str, fed_dir_data: str, args, freeze_layers):
         self.cid = cid
         self.args = args
         self.args.output_dir = self.args.output_dir + str(int(cid)+1)
@@ -272,7 +272,7 @@ class FlowerClient(fl.client.NumPyClient):
         print("Eval Data loading finished...")
         
         if self.args.do_freeze:
-            freeze(self.model, len(self.train_dataloader))
+            freeze(self.model, freeze_layers, self.cid)
             
         #print("cuda:{}".format(str(int(cid)+7)))
 
@@ -299,24 +299,46 @@ class FlowerClient(fl.client.NumPyClient):
         # Return statistics
         return float(loss), len(self.eval_dataloader), {"perplexity": float(perplexity)}
     
-    def freeze(model, train_size):
-        train_all = 270000
-        layer_all = 6
-        freeze_layer = round(layer_all * train_size / train_all)
-        get_para_num(model)
-        get_trainable_para_num(model)
-        
+def freeze(model, freeze_layers, cid):
+
+    get_para_num(model)
+    get_trainable_para_num(model)
+    layer_all = 6
+    if int(cid) == 0:
+        if freeze_layers[0] == 1:
+            freeze_unfreeze_layers(model, 0, unfreeze=False)
+        else:       
+            freeze_unfreeze_layers(model, (0, freeze_layers[0]-1), unfreeze=False)
+    else:
+        before = sum(freeze_layers[0:int(cid)])
+        start = before % layer_all
+        if freeze_layers[int(cid)] == 1:
+            freeze_unfreeze_layers(model, start, unfreeze=False)
+        else: 
+            end = start + freeze_layers[int(cid)] - 1
+            if end < 6:     
+                freeze_unfreeze_layers(model, (start, end), unfreeze=False)
+            else: 
+                freeze_unfreeze_layers(model, (start, 5), unfreeze=False)
+                if end ==6 :
+                    freeze_unfreeze_layers(model, 0, unfreeze=False)
+                else:
+                    freeze_unfreeze_layers(model, (0, end - 6), unfreeze=False)
+                
+    get_para_num(model)
+    get_trainable_para_num(model)
+    
+def allocate_freeze(train_list, num_clients):
+    train_all = sum(train_list)
+    layer_all = 6
+    freeze_layers = []
+    for cid in range(num_clients):
+        freeze_layer = round(layer_all * train_list[cid] / train_all)
         if freeze_layer == 0:
             freeze_layer += 1
-            
-        layer = self.cid * freeze_layer % layer_all
-        if freeze_layer == 1:
-            freeze_unfreeze_layers(model, layer, unfreeze=False)
-        else:       
-            freeze_unfreeze_layers(model, (layer, (layer + freeze_layer-1) % layer_all), unfreeze=False)
-
-        get_para_num(model)
-        get_trainable_para_num(model)
+        freeze_layers.append(freeze_layer)
+        
+    return freeze_layers
 
 
 def fit_config(server_round: int) -> Dict[str, Scalar]:
@@ -384,14 +406,17 @@ if __name__ == "__main__":
         "num_gpus": 1
     }  # each client will get allocated 3 CPUs
 
-
-    # partition dataset (use a large `alpha` to make it IID;
-    # a small value (e.g. 1) will make it non-IID)
-    # This will create a new directory called "federated": in the directory where
-    # CIFAR-10 lives. Inside it, there will be N=pool_size sub-directories each with
-    # its own train/set split.
-    #fed_dir = fl_partition(pool_size)
-    
+    freeze_layers = []
+    if args.do_freeze:
+        train_list = []
+        for i in range (args.num_clients):
+            with open(args.fed_dir_data + 'client{}/train{}_dataloader.pkl'.format(args.num_clients, i),'rb') as f:
+                train_f = dill.load(f)
+                train_list.append(len(train_f))
+        print(train_list)
+        freeze_layers = allocate_freeze(train_list, args.num_clients)
+        print(freeze_layers)
+            
     # configure the strategy
     from fedavg import FedAvg
     strategy = FedAvg(
@@ -406,7 +431,7 @@ if __name__ == "__main__":
 
     def client_fn(cid: str):
         # create a single client instance
-        return FlowerClient(cid, args.fed_dir_data, args)
+        return FlowerClient(cid, args.fed_dir_data, args, freeze_layers)
 
     # (optional) specify Ray config
     ray_init_args = {"include_dashboard": False}
