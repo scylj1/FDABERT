@@ -330,12 +330,14 @@ def freeze(model, freeze_layers, cid):
     
 def allocate_freeze(train_list, num_clients):
     train_all = sum(train_list)
-    layer_all = 6
+    layer_all = 12
     freeze_layers = []
     for cid in range(num_clients):
         freeze_layer = round(layer_all * train_list[cid] / train_all)
         if freeze_layer == 0:
             freeze_layer += 1
+        if freeze_layer > 4:
+            freeze_layer = 4
         freeze_layers.append(freeze_layer)
         
     return freeze_layers
