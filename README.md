@@ -46,6 +46,13 @@ python3 get_dataloader.py \
     --dataset_dir "noniid_voc/" \
 ```
 
+### Downstream task data
+
+```bash
+# Download datasets
+cd downstream-task
+bash download.sh
+```
 
 
 ## Federate Domain-adaptive Pre-training
@@ -66,12 +73,6 @@ python3 fdabert.py \
 
 
 ## Evaluate on Downstream Tasks
-
-```bash
-# Download datasets
-cd downstream-task
-bash download.sh
-```
 
 ### Named Entity Recognition
 
