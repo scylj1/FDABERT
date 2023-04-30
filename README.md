@@ -184,5 +184,5 @@ python ./scripts/re_eval.py --output_path=${SAVE_DIR}/${ENTITY}/test_results.txt
 
 ## Acknowledgement
 
-We would like to thank the authors for providing the code access to [Flower](https://github.com/adap/flower), [Hugging Face]([Hugging Face (github.com)](https://github.com/huggingface)) and [BioBERT](https://github.com/dmis-lab/biobert-pytorch).
+We would like to thank the authors for providing the code access to [Flower](https://github.com/adap/flower), [Hugging Face](https://github.com/huggingface) and [BioBERT](https://github.com/dmis-lab/biobert-pytorch).
 
