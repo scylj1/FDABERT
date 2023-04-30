@@ -12,47 +12,43 @@ nltk.download('punkt')
 def test_sent_len(num, outdir, ifval):
    
     for n in range(num):
-        if ifval==True:
-            dics = load_file(str(outdir + 'client{}/val{}.txt'.format(num, n+1)))
-        else:
-            print('train')
-            dics = load_file(str(outdir + 'client{}/train{}.txt'.format(num, n+1)))
+        
+        print('train')
+        dics = load_file(str(outdir + 'client{}/train{}.txt'.format(num, n+1)))
             
         print("load finish{}".format(n+1))
         lens = get_sentence_len(dics)
         print(outdir + " average sentence length{}".format(sum(lens)/len(lens)))
     
-    '''dics2 = load_file("client2/train2.txt")
+    dics2 = load_file("client2/train2.txt")
     dics1 = load_file("client2/train1.txt")
     lens1 = get_sentence_len(dics1)
     lens2 = get_sentence_len(dics2)
     print("noniid file1 average sentence length{}".format(sum(lens1)/len(lens1)))
-    print("noniid file2 average sentence length{}".format(sum(lens2)/len(lens2)))'''
+    print("noniid file2 average sentence length{}".format(sum(lens2)/len(lens2)))
     
 
 def test_voc(num, outdir, ifval):
     for n in range(num):
-        if ifval==True:
-            dics = load_file(str(outdir + 'client{}/val{}.txt'.format(num, n+1)))
-        else:
-            print('train')
-            dics = load_file(str(outdir + 'client{}/train{}.txt'.format(num, n+1)))
+        
+        print('train')
+        dics = load_file(str(outdir + 'client{}/train{}.txt'.format(num, n+1)))
             
         print("load finish{}".format(n+1))
         lens = test_vocab(dics)
         
-    '''dics2 = load_file("client2/train2.txt")
+    dics2 = load_file("client2/train2.txt")
     dics1 = load_file("client2/train1.txt")
     print("load finish")
     len1 = test_vocab(dics1)
-    len2 = test_vocab(dics2)'''
+    len2 = test_vocab(dics2)
     
     
-    '''dics2 = load_file("client2/val2.txt")
+    dics2 = load_file("client2/val2.txt")
     dics1 = load_file("client2/val1.txt")
     print("load finish")
     len1 = test_vocab(dics1)
-    len2 = test_vocab(dics2)'''
+    len2 = test_vocab(dics2)
     
     
 def load_file(file):
@@ -118,9 +114,10 @@ def test_vocab(dics):
         #print(count)
         
     print(count)
+    print(count/len(dics))
     return count
 
-def noniid_partition(num, rank, file, outdir, ifval = True):
+def noniid_partition(num, rank, file, outdir, ifval):
     num_files = num
     with open(file) as in_file:
         lines = in_file.readlines()
@@ -197,8 +194,8 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    
-    if args.only_test == False: 
+    print(args.only_test)
+    if (args.only_test == False): 
         if args.noniid_type == 'num':
             noniid_partition_num(args.num_clients, args.output_dir)
         
@@ -215,7 +212,7 @@ if __name__ == "__main__":
         
             if args.noniid_type == 'voc':
                 tem = np.divide(np.mat(sent_lens),np.mat(vocs_lens))
-                tem = np.divide(np.mat(tem),np.mat(vocs_lens))
+                #tem = np.divide(np.mat(tem),np.mat(vocs_lens))
             
             if args.noniid_type == 'len':
                 tem = np.divide(np.mat(vocs_lens),np.mat(sent_lens))

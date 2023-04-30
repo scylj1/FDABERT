@@ -49,11 +49,12 @@ MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Flower Simulation with bert")
+    parser = argparse.ArgumentParser(description="Generate dataloader")
 
     parser.add_argument("--num_client_cpus", type=int, default=3)
     parser.add_argument("--num_rounds", type=int, default=2)
     parser.add_argument("--num_clients", type=int, default=2)
+    parser.add_argument("--iid", type=bool, default=False)
 
     parser.add_argument(
         "--dataset_dir",
@@ -426,25 +427,43 @@ if __name__ == "__main__":
     # parse input arguments
     args = parse_args()
     num_clients = args.num_clients
-    # d = fl_partition(2)
-    for n in range(num_clients):
-        args.train_file = args.dataset_dir + 'client{}/train{}.txt'.format(num_clients, n+1)
-        args.validation_file = args.dataset_dir + 'client{}/val{}.txt'.format(num_clients, n+1)
+    
+    if num_clients > 1:
+        if args.iid:
+            d = fl_partition(num_clients)
+            for n in range(num_clients):
+                args.train_file = 'client{}/train{}.txt'.format(num_clients, n+1)
+                args.validation_file = 'client{}/val{}.txt'.format(num_clients, n+1)
+                train_dataloader, eval_dataloader = load_data(args, 5)
+
+                with open('client{}/train{}_dataloader.pkl'.format(num_clients, n),'wb') as f:
+                    dill.dump(train_dataloader, f)
+
+                with open('client{}/eval{}_dataloader.pkl'.format(num_clients, n),'wb') as f:
+                    dill.dump(eval_dataloader, f)
+        else:
+            for n in range(num_clients):
+                args.train_file = args.dataset_dir + 'client{}/train{}.txt'.format(num_clients, n+1)
+                args.validation_file = args.dataset_dir + 'client{}/val{}.txt'.format(num_clients, n+1)
+                train_dataloader, eval_dataloader = load_data(args, 5)
+
+                with open(args.dataset_dir + 'client{}/train{}_dataloader.pkl'.format(num_clients, n),'wb') as f:
+                    dill.dump(train_dataloader, f)
+
+                with open(args.dataset_dir + 'client{}/eval{}_dataloader.pkl'.format(num_clients, n),'wb') as f:
+                    dill.dump(eval_dataloader, f)
+        
+    if num_clients == 1:
+        args.train_file = 'train.txt'
+        args.validation_file = 'val.txt'
         train_dataloader, eval_dataloader = load_data(args, 5)
 
-        with open(args.dataset_dir + 'client{}/train{}_dataloader.pkl'.format(num_clients, n),'wb') as f:
+        with open('client1/train0_dataloader.pkl','wb') as f:
             dill.dump(train_dataloader, f)
 
-        with open(args.dataset_dir + 'client{}/eval{}_dataloader.pkl'.format(num_clients, n),'wb') as f:
+        with open('client1/eval0_dataloader.pkl','wb') as f:
             dill.dump(eval_dataloader, f)
-    
-    '''args.train_file = 'train.txt'
-    args.validation_file = 'val.txt'
-    train_dataloader, eval_dataloader = load_data(args, 5)
-
-    with open('train8_dataloader.pkl','wb') as f:
-        dill.dump(train_dataloader, f)
-
-    with open('eval8_dataloader.pkl','wb') as f:
-        dill.dump(eval_dataloader, f)'''
+            
+        with open('eval_dataloader.pkl','wb') as f:
+            dill.dump(eval_dataloader, f)
     
