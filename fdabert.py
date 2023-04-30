@@ -8,7 +8,7 @@ import numpy as np
 from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, Callable, Optional, Tuple, List
-from utils import fl_partition, initialise, train, test, logger #, load_data
+from utils.utils import fl_partition, initialise, train, test, logger #, load_data
 import argparse
 import json
 import logging
@@ -42,7 +42,7 @@ from transformers import (
 import dill
 from transformers.utils import check_min_version, get_full_repo_name, send_example_telemetry
 from transformers.utils.versions import require_version
-from freeze import freeze_unfreeze_layers, get_para_num, get_trainable_para_num
+from utils.freeze import freeze_unfreeze_layers, get_para_num, get_trainable_para_num
 #os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/language-modeling/requirements.txt")
@@ -330,7 +330,7 @@ def freeze(model, freeze_layers, cid):
     
 def allocate_freeze(train_list, num_clients):
     train_all = sum(train_list)
-    layer_all = 12
+    layer_all = 6
     freeze_layers = []
     for cid in range(num_clients):
         freeze_layer = round(layer_all * train_list[cid] / train_all)
@@ -341,15 +341,6 @@ def allocate_freeze(train_list, num_clients):
         freeze_layers.append(freeze_layer)
         
     return freeze_layers
-
-
-def fit_config(server_round: int) -> Dict[str, Scalar]:
-    """Return a configuration with static batch size and (local) epochs."""
-    config = {
-        "epochs": 1,  # number of local epochs
-        "batch_size": 8,
-    }
-    return config
 
 
 def get_params(model: torch.nn.ModuleList) -> List[np.ndarray]:
@@ -367,21 +358,20 @@ def set_params(model: torch.nn.ModuleList, params: List[np.ndarray]):
 
 
 def get_evaluate_fn(
-    testset, args
+    args
 ) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
     def evaluate(
         server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
     ) -> Optional[Tuple[float, float]]:
-        """Use the entire CIFAR-10 test set for evaluation."""
 
         # determine device
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = initialise(args)
         
    
-        with open('data_real/eval_dataloader.pkl','rb') as f:
+        with open('data/eval_dataloader.pkl','rb') as f:
             eval_dataloader = dill.load(f)
 
         set_params(model, parameters)
@@ -420,15 +410,14 @@ if __name__ == "__main__":
         print(freeze_layers)
             
     # configure the strategy
-    from fedavg import FedAvg
+    from utils.fedavg import FedAvg
     strategy = FedAvg(
         fraction_fit=0.1,
         fraction_evaluate=0.1,
         min_fit_clients=pool_size,
         min_evaluate_clients=pool_size,
         min_available_clients=pool_size,  # All clients should be available
-        on_fit_config_fn=fit_config,
-        evaluate_fn=get_evaluate_fn("data/partition/val1.txt", args),  # centralised evaluation of global model
+        evaluate_fn=get_evaluate_fn(args),  # centralised evaluation of global model
     )
 
     def client_fn(cid: str):
@@ -438,7 +427,7 @@ if __name__ == "__main__":
     # (optional) specify Ray config
     ray_init_args = {"include_dashboard": False}
 
-    from app import start_simulation
+    from utils.app import start_simulation
     # start simulation
     start_simulation(
         client_fn=client_fn,
