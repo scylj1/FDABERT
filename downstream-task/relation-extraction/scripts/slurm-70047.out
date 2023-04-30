@@ -1,0 +1,70 @@
+*****  euadr  test score  1  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 84.37%
+recall      : 100.00%
+precision   : 72.97%
+specificity : 0.00%
+*****  euadr  test score  2  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 84.37%
+recall      : 100.00%
+precision   : 72.97%
+specificity : 0.00%
+*****  euadr  test score  3  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 83.87%
+recall      : 100.00%
+precision   : 72.22%
+specificity : 0.00%
+*****  euadr  test score  4  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 85.25%
+recall      : 100.00%
+precision   : 74.29%
+specificity : 0.00%
+*****  euadr  test score  5  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 85.25%
+recall      : 100.00%
+precision   : 74.29%
+specificity : 0.00%
+*****  euadr  test score  6  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 85.25%
+recall      : 100.00%
+precision   : 74.29%
+specificity : 0.00%
+*****  euadr  test score  7  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 85.25%
+recall      : 100.00%
+precision   : 74.29%
+specificity : 0.00%
+*****  euadr  test score  8  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 85.25%
+recall      : 100.00%
+precision   : 74.29%
+specificity : 0.00%
+*****  euadr  test score  9  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 85.25%
+recall      : 100.00%
+precision   : 74.29%
+specificity : 0.00%
+*****  euadr  test score  10  *****
+/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/sklearn/metrics/_classification.py:1248: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, msg_start, len(result))
+f1 score    : 85.25%
+recall      : 100.00%
+precision   : 74.29%
+specificity : 0.00%

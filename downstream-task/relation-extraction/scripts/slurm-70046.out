@@ -1,0 +1,170 @@
+*****  euadr  test score  1  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/1/test_original.tsv'
+*****  euadr  test score  2  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/2/test_original.tsv'
+*****  euadr  test score  3  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/3/test_original.tsv'
+*****  euadr  test score  4  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/4/test_original.tsv'
+*****  euadr  test score  5  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/5/test_original.tsv'
+*****  euadr  test score  6  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/6/test_original.tsv'
+*****  euadr  test score  7  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/7/test_original.tsv'
+*****  euadr  test score  8  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/8/test_original.tsv'
+*****  euadr  test score  9  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/9/test_original.tsv'
+*****  euadr  test score  10  *****
+Traceback (most recent call last):
+  File "re_eval.py", line 14, in <module>
+    testdf = pd.read_csv(args.answer_path, sep="\t", index_col=0)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 688, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 454, in _read
+    parser = TextFileReader(fp_or_buf, **kwds)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 948, in __init__
+    self._make_engine(self.engine)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 1180, in _make_engine
+    self._engine = CParserWrapper(self.f, **self.options)
+  File "/nfs-share/lj408/miniconda3/envs/test/lib/python3.6/site-packages/pandas/io/parsers.py", line 2010, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 382, in pandas._libs.parsers.TextReader.__cinit__
+  File "pandas/_libs/parsers.pyx", line 674, in pandas._libs.parsers.TextReader._setup_parser_source
+FileNotFoundError: [Errno 2] No such file or directory: '../../datasets/RE/euadr/10/test_original.tsv'
