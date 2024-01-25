@@ -1,6 +1,6 @@
 # Federated Domain-adaptive Pre-training
 
-This repository is  the implementation of Federated Domain-adaptive Pre-training (FDAPT) for language models. 
+This repository is  the implementation of FDAPT: Federated Domain-adaptive Pre-training for Language Models.  
 
 
 
@@ -186,3 +186,14 @@ python ./scripts/re_eval.py --output_path=${SAVE_DIR}/${ENTITY}/test_results.txt
 
 We would like to thank the authors for providing the code access to [Flower](https://github.com/adap/flower), [Hugging Face](https://github.com/huggingface) and [BioBERT](https://github.com/dmis-lab/biobert-pytorch).
 
+## Citation
+If you find this repo useful, please cite our work. 
+```bibtex
+@inproceedings{jiang2023fdapt,
+  title={FDAPT: Federated Domain-adaptive Pre-training for Language Models},
+  author={Jiang, Lekang and Svoboda, Filip and Lane, Nicholas Donald},
+  booktitle={International Workshop on Federated Learning in the Age of Foundation Models in Conjunction with NeurIPS 2023},
+  year={2023}
+}
+}
+```
