@@ -191,9 +191,9 @@ If you find this repo useful, please cite our work.
 ```bibtex
 @inproceedings{jiang2023fdapt,
   title={FDAPT: Federated Domain-adaptive Pre-training for Language Models},
-  author={Jiang, Lekang and Svoboda, Filip and Lane, Nicholas Donald},
+  author={Lekang Jiang and Filip Svoboda and Nicholas Donald Lane},
   booktitle={International Workshop on Federated Learning in the Age of Foundation Models in Conjunction with NeurIPS 2023},
   year={2023}
 }
-}
+
 ```
